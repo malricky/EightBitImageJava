@@ -1,22 +1,23 @@
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.imageio.ImageIO;
 
-public class Main{
-    public static void main(String args[]) throws IOException, InterruptedException{
+public class Main {
+    public static void main(String args[]) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
 
         String img_path = "images/5MP.jpg";
         int num_threads = Runtime.getRuntime().availableProcessors();
 
-        if(args.length > 0 && args.length%2 == 0){
-            for(int i=0;i<args.length;i+=2){
-                if(args[i].equals("-i")){
-                    img_path = args[i+1];
-                }
-                else if(args[i].equals("-t")){
-                    num_threads = Integer.parseInt(args[i+1]);
+        if (args.length > 0 && args.length % 2 == 0) {
+            for (int i = 0; i < args.length; i += 2) {
+                if (args[i].equals("-i")) {
+                    img_path = args[i + 1];
+                } else if (args[i].equals("-t")) {
+                    num_threads = Integer.parseInt(args[i + 1]);
                 }
             }
         }
@@ -25,26 +26,27 @@ public class Main{
         BufferedImage image = ImageIO.read(img_file);
         int img_width = image.getWidth();
         int img_height = image.getHeight();
-        byte matrix[][][] = new byte[img_width][img_height][3];
-        int size = (img_width*img_height)/num_threads;
 
-        Runnable task = new EightBitImage(image,img_width,img_height,matrix,num_threads,size);
-        Thread threads[] = new Thread[num_threads];
+        byte[] rgb_matrix = new byte[img_width * img_height * 3];
+        int[] pixelMatrix = new int[img_width * img_height];
+        int size = (img_width * img_height) / num_threads;
 
-        for(int i=0;i<num_threads;i++){
-            threads[i] = new Thread(task);
-            threads[i].start();
+        Runnable task = new EightBitImage(image, img_width, img_height, rgb_matrix, pixelMatrix, num_threads, size);
+
+        ExecutorService executor = Executors.newFixedThreadPool(num_threads);
+
+        for (int i = 0; i < num_threads; i++) {
+            executor.submit(task);
         }
 
-        for(int i=0;i<num_threads;i++){
-            threads[i].join();
+        executor.shutdown();
+        while (!executor.isTerminated()) {
         }
 
-        System.out.println((matrix[0][0][0] & 0xFF)+";"+(matrix[0][0][1] & 0xFF)+";"+(matrix[0][0][2] & 0xFF));
+        System.out.println((rgb_matrix[0] & 0xFF) + ";" + (rgb_matrix[1] & 0xFF) + ";" + (rgb_matrix[2] & 0xFF));
 
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
-
-        System.out.println("Execution time: " + duration+" ms");
+        System.out.println("Total execution time: " + duration + " ms");
     }
 }
