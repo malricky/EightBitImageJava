@@ -28,10 +28,9 @@ public class Main {
         int img_height = image.getHeight();
 
         byte[] rgb_matrix = new byte[img_width * img_height * 3];
-        int[] pixelMatrix = new int[img_width * img_height];
         int size = (img_width * img_height) / num_threads;
 
-        Runnable task = new EightBitImage(image, img_width, img_height, rgb_matrix, pixelMatrix, num_threads, size);
+        Runnable task = new EightBitImage(image, img_width, img_height, rgb_matrix, size);
 
         ExecutorService executor = Executors.newFixedThreadPool(num_threads);
 
