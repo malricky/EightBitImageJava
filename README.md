@@ -1,4 +1,4 @@
-# EightBitImageJava
+# Eight Bit Image Processor
 
 <b>Usage:</b>
 1. ``` javac Main.java ```
