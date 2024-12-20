@@ -9,15 +9,24 @@ public class Main {
     public static void main(String args[]) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
 
-        String img_path = "images/5MP.jpg";
+        String img_path = "images/200MP.jpg";
         int num_threads = Runtime.getRuntime().availableProcessors();
+        int device_id = 1;
 
         if (args.length > 0 && args.length % 2 == 0) {
             for (int i = 0; i < args.length; i += 2) {
-                if (args[i].equals("-i")) {
-                    img_path = args[i + 1];
-                } else if (args[i].equals("-t")) {
-                    num_threads = Integer.parseInt(args[i + 1]);
+                switch (args[i]) {
+                    case "-i":
+                        img_path = args[i + 1];
+                        break;
+                    case "-t":
+                        num_threads = Integer.parseInt(args[i + 1]);
+                        break;
+                    case "-d":
+                        device_id = Integer.parseInt(args[i + 1]);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -30,7 +39,7 @@ public class Main {
         byte[] rgb_matrix = new byte[img_width * img_height * 3];
         int size = (img_width * img_height) / num_threads;
 
-        Runnable task = new EightBitImage(image, img_width, img_height, rgb_matrix, size);
+        Runnable task = new EightBitImage(image, img_width, img_height, rgb_matrix, size,device_id);
 
         ExecutorService executor = Executors.newFixedThreadPool(num_threads);
 
@@ -42,7 +51,7 @@ public class Main {
         while (!executor.isTerminated()) {
         }
 
-        System.out.println((rgb_matrix[0] & 0xFF) + ";" + (rgb_matrix[1] & 0xFF) + ";" + (rgb_matrix[2] & 0xFF));
+        System.out.println("Pixel (0,0): (R,G,B) = ("+(rgb_matrix[0] & 0xFF) + "," + (rgb_matrix[1] & 0xFF) + "," + (rgb_matrix[2] & 0xFF)+")");
 
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
