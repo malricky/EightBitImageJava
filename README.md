@@ -8,7 +8,7 @@
 1. ``` javac Main.java ```
 2. ``` java -Xmx8g Main -i images/53MP.jpg -t 8 ```
 
-# Conversion of C program to .DLL shared object file
+<h2>Conversion of C program to .DLL shared object file</h2>
 
 ``` gcc -shared -o image_processor.dll image_processor.c -I"C:/Program Files/Java/jdk-23/include" -I"C:/Program Files/Java/jdk-23/include/win32" -I"C:/Users/RICKY/Documents/5TH_SEM_PROJ" -L"C:/Program Files (x86)/Common Files/Intel/Shared Libraries/lib" -I"C:/Users/RICKY/Downloads/OpenCL-Headers-main/OpenCL-Headers-main" -lOpenCl -fopenmp ```
 
