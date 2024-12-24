@@ -7,8 +7,10 @@ public class EightBitImage implements Runnable {
     private final byte[] rgb_matrix;
     private final int img_width, img_height;
     private static int threadIdx = 0;
+    private static float progress = 20.0f;
     private final int size;
-    private int device_id;
+    private final int device_id;
+    private final float contrib;
 
     static {
         System.loadLibrary("image_processor");
@@ -16,13 +18,19 @@ public class EightBitImage implements Runnable {
 
     private native void getRGBMatrix(byte[] rgbMatrix,int[] pixelMatrix,int size,int device_id);
 
-    public EightBitImage(BufferedImage image, int img_width, int img_height, byte[] rgb_matrix, int size,int device_id) throws IOException {
+    public EightBitImage(BufferedImage image, int img_width, int img_height, byte[] rgb_matrix, int size,int device_id,float contrib) throws IOException {
         this.image = image;
         this.img_width = img_width;
         this.img_height = img_height;
         this.rgb_matrix = rgb_matrix;
         this.size = size;
         this.device_id = device_id;
+        this.contrib = contrib;
+    }
+
+    private synchronized void updateProgress(){
+        System.out.print("\rProgress: " + Math.min(EightBitImage.progress, 100) + "% Complete [Extracting RGB From Image]");
+        System.out.flush(); 
     }
 
     private void generateMatrix(int start, int size) {
@@ -38,7 +46,13 @@ public class EightBitImage implements Runnable {
             pixelMatrix[j] = this.image.getRGB(col, row);
         }
 
+        EightBitImage.progress += Math.ceil(contrib/3);
+        updateProgress();
+
         getRGBMatrix(tmp_rgb_matrix, pixelMatrix, size, device_id);
+
+        EightBitImage.progress += Math.ceil(contrib/3);
+        updateProgress();
 
         for (int i = 0; i < size; i++) {
             int index = start + i;
@@ -48,8 +62,10 @@ public class EightBitImage implements Runnable {
             this.rgb_matrix[index * 3 + 1] = tmp_rgb_matrix[i * 3 + 1]; 
             this.rgb_matrix[index * 3 + 2] = tmp_rgb_matrix[i * 3 + 2]; 
         }
-    }
 
+        EightBitImage.progress += Math.ceil(contrib/3);
+        updateProgress();
+    }
 
     @Override
     public void run() {
